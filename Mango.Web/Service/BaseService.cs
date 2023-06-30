@@ -16,6 +16,7 @@ namespace Mango.Web.Service
         }
         public async Task<ResponseDto> SendAsync(RequestDto requestDto)
         {
+            int num = ((int)Apitype.GET);
             try
             {
                 HttpClient client = _httpClientFactory.CreateClient("MangoAPI");
@@ -80,3 +81,5 @@ namespace Mango.Web.Service
         }
     }
 }
+
+

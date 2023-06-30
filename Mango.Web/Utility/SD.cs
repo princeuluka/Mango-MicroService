@@ -8,7 +8,9 @@
             GET,
             POST,
             PUT,
-            DELETE
+            DELETE,
+            
         }
+        
     }
 }
