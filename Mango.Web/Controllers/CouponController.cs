@@ -27,9 +27,8 @@ namespace Mango.Web.Controllers
             }
             else
             {
-                TempData["error"] = "Error";
+                TempData["error"] = response.Message;
             }
-            //TempData["success"] = response?.Message;
             return View(list);
         }
 
@@ -51,7 +50,7 @@ namespace Mango.Web.Controllers
                 }
                 else
                 {
-                    TempData["error"] = "Error";
+                    TempData["error"] = response.Message;
                 }
             }
             else
@@ -73,7 +72,7 @@ namespace Mango.Web.Controllers
             }
             else
             {
-                TempData["error"] = "Error";
+                TempData["error"] = response.Message;
             }
             return NotFound();
 		}
@@ -91,7 +90,7 @@ namespace Mango.Web.Controllers
                 }
                 else
                 {
-                    TempData["error"] = "Error";
+                    TempData["error"] = response.Message;
                 }
             }
 			return View(couponDto);
