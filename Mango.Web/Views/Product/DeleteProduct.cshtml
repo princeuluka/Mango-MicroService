@@ -1,0 +1,53 @@
+﻿@model ProductDto
+<form asp-action="DeleteProduct">
+    <br />
+    <div class="container border p-3">
+        <h1 class="text-white text-center">Delete Product</h1>
+        <hr />
+        <div class="row">
+            <input asp-for="ProductId" hidden />
+            <div class="col-2">
+                <label class="control-label pt-2" asp-for="Name" style="font-size:20px;">Name</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="Name" disabled />
+                
+            </div>
+            <div class="col-2">
+                <label class="control-label pt-2" style="font-size:20px;" asp-for="CategoryName">Category Name</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="CategoryName" disabled />
+                
+            </div>
+            <div class="col-2">
+                <label class="control-label pt-2" asp-for="Description" style="font-size:20px;">Description</label>
+            </div>
+            <div class="col-10 pb-3">
+                <textarea class="form-control" rows="5" asp-for="Description" disabled></textarea>
+               
+            </div>
+            <div class="col-2">
+                <label class="control-label pt-2" asp-for="ImageUrl" style="font-size:20px;">ImageUrl</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="ImageUrl" disabled />
+               
+            </div>
+            <div class="col-2">
+                <label class="control-label pt-2" asp-for="Price" style="font-size:20px;">Price</label>
+            </div>
+            <div class="col-10 pb-3">
+                <input class="form-control" asp-for="Price" disabled />
+                
+            </div>
+            <div class="col-5 offset-2">
+
+                <a class="btn-primary btn form-control" asp-action="ProductIndex">Back to List</a>
+            </div>
+            <div class="col-5">
+                <input type="submit" value="Delete" class="btn btn-danger form-control" />
+            </div>
+        </div>
+    </div>
+</form>
