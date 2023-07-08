@@ -128,7 +128,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             {
                 CartDto cart = new()
                 {
-                    CartHeader = _mapper.Map<CartHeaderDto>(_db.CartHeaders.First(u => u.UserId == userId))
+                    CartHeader = _mapper.Map<CartHeaderDto?>(_db.CartHeaders.First(u => u.UserId == userId))
                 };
 
                 cart.CartDetails = _mapper.Map<IEnumerable<CartDetailsDto>>(_db.CartDetails
