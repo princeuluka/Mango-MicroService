@@ -1,5 +1,6 @@
 using Mango.Service.EmailAPI.Extension;
 using Mango.Service.EmailAPI.Messaging;
+using Mango.Service.EmailAPI.Services;
 using Mango.Services.EmailAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,12 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+ 
+var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
+optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddSingleton(new EmailService(optionBuilder.Options));
+
+
 
 builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
 
@@ -23,7 +30,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
+{ 
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -33,8 +40,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-ApplyMigration();
+
 app.UseAzureServiceBusConsumer();
+
+ApplyMigration();
+
 app.Run();
 void ApplyMigration()
 {

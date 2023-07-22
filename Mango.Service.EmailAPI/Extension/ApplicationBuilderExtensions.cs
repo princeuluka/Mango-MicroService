@@ -9,11 +9,11 @@ namespace Mango.Service.EmailAPI.Extension
         public static IApplicationBuilder UseAzureServiceBusConsumer(this IApplicationBuilder app)
         {
             serviceBusConsumer = app.ApplicationServices.GetService<IAzureServiceBusConsumer>();
-            IHostApplicationLifetime? hostApplicationLife = app.ApplicationServices.GetService<IHostApplicationLifetime>();
+            var hostApplicationLife = app.ApplicationServices.GetService<IHostApplicationLifetime>();
 
 
             hostApplicationLife?.ApplicationStarted.Register(OnStart);
-            hostApplicationLife?.ApplicationStarted.Register(OnStop);
+            hostApplicationLife?.ApplicationStopping.Register(OnStop);
 
             return app;
         }
