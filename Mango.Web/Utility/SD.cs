@@ -17,8 +17,8 @@
             POST,
             PUT,
             DELETE,
-            
+
         }
-        
+
     }
 }

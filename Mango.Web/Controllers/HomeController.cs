@@ -3,7 +3,6 @@ using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Mango.Web.Controllers
@@ -80,7 +79,7 @@ namespace Mango.Web.Controllers
                 ProductId = productDto.ProductId,
             };
 
-            List<CartDetailsDto> cartDetailsDtos = new() { cartDetailsDto};
+            List<CartDetailsDto> cartDetailsDtos = new() { cartDetailsDto };
 
             cartDto.CartDetails = cartDetailsDtos;
 

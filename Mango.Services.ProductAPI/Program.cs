@@ -45,7 +45,7 @@ builder.Services.AddSwaggerGen(options =>
 
 });
 
-builder.Services.AddDbContextFactory<AppDbContext>(option =>
+builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });

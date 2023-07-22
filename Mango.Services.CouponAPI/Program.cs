@@ -4,10 +4,7 @@ using Mango.Services.CouponAPI.Data;
 using Mango.Services.CouponAPI.Extentions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Cryptography.Xml;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition(name : "Bearer", securityScheme: new OpenApiSecurityScheme
+    options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
@@ -44,7 +41,7 @@ builder.Services.AddSwaggerGen(options =>
 
 
 
-builder.Services.AddDbContextFactory<AppDbContext>(option =>
+builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });

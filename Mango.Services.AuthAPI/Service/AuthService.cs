@@ -40,7 +40,7 @@ namespace Mango.Services.AuthAPI.Service
         public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
         {
             var user = _db.ApplicationUsers.FirstOrDefault(u => u.UserName.ToLower() == loginRequestDTO.Username.ToLower());
-            bool isValid = await _userManager.CheckPasswordAsync(user,loginRequestDTO.Password);
+            bool isValid = await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password);
             if (user == null || isValid == false)
             {
                 return new LoginResponseDTO()
@@ -70,7 +70,7 @@ namespace Mango.Services.AuthAPI.Service
                     User = userDTO,
                     Token = token
                 };
-            return loginResponseDTO;
+                return loginResponseDTO;
 
             }
 
@@ -89,7 +89,7 @@ namespace Mango.Services.AuthAPI.Service
 
             try
             {
-                var result = await _userManager.CreateAsync(user,registrationRequestDTO.Password);
+                var result = await _userManager.CreateAsync(user, registrationRequestDTO.Password);
 
                 if (result.Succeeded)
                 {

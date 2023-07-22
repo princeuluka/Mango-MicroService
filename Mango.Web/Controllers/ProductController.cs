@@ -1,5 +1,4 @@
 ﻿using Mango.Web.Models;
-using Mango.Web.Service;
 using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -12,7 +11,7 @@ namespace Mango.Web.Controllers
 
         public ProductController(IProductService productService)
         {
-                _productService = productService;
+            _productService = productService;
         }
         public async Task<IActionResult> ProductIndex()
         {

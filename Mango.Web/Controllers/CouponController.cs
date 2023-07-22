@@ -2,8 +2,6 @@
 using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Mango.Web.Controllers
 {
@@ -20,10 +18,10 @@ namespace Mango.Web.Controllers
             List<CouponDto> list = new();
             ResponseDto response = await _couponService.GetAllCouponsAsync();
 
-            if (response!= null && response.IsSuccess)
+            if (response != null && response.IsSuccess)
             {
                 list = JsonConvert.DeserializeObject<List<CouponDto>>(Convert.ToString(response.Result));
-              
+
             }
             else
             {
@@ -37,8 +35,8 @@ namespace Mango.Web.Controllers
             return View();
         }
         [HttpPost]
-		public async Task<IActionResult> CreateCoupon(CouponDto model)
-		{
+        public async Task<IActionResult> CreateCoupon(CouponDto model)
+        {
             if (ModelState.IsValid)
             {
                 ResponseDto response = await _couponService.CreateCouponAsync(model);
@@ -58,16 +56,16 @@ namespace Mango.Web.Controllers
                 TempData["error"] = "Invalid Data";
             }
             return View(model);
-		
-		}
 
-		public async Task<IActionResult> DeleteCoupon(int couponId)
-		{
-			ResponseDto response = await _couponService.GetCouponByIdAsync(couponId);
+        }
 
-			if (response != null && response.IsSuccess)
-			{
-				CouponDto model = JsonConvert.DeserializeObject<CouponDto>(Convert.ToString(response.Result));
+        public async Task<IActionResult> DeleteCoupon(int couponId)
+        {
+            ResponseDto response = await _couponService.GetCouponByIdAsync(couponId);
+
+            if (response != null && response.IsSuccess)
+            {
+                CouponDto model = JsonConvert.DeserializeObject<CouponDto>(Convert.ToString(response.Result));
                 return View(model);
             }
             else
@@ -75,16 +73,16 @@ namespace Mango.Web.Controllers
                 TempData["error"] = response.Message;
             }
             return NotFound();
-		}
-		[HttpPost]
-		public async Task<IActionResult> DeleteCoupon(CouponDto couponDto)
-		{
-			if (ModelState.IsValid)
-			{
-				ResponseDto response = await _couponService.DeleteCouponAsync(couponDto.CouponId);
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteCoupon(CouponDto couponDto)
+        {
+            if (ModelState.IsValid)
+            {
+                ResponseDto response = await _couponService.DeleteCouponAsync(couponDto.CouponId);
 
-				if (response != null && response.IsSuccess)
-				{
+                if (response != null && response.IsSuccess)
+                {
                     TempData["success"] = "Coupon deleted successfully";
                     return RedirectToAction(nameof(CouponIndex));
                 }
@@ -93,9 +91,9 @@ namespace Mango.Web.Controllers
                     TempData["error"] = response.Message;
                 }
             }
-			return View(couponDto);
+            return View(couponDto);
 
-		}
+        }
 
-	}
+    }
 }

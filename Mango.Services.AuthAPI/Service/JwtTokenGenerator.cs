@@ -13,9 +13,9 @@ namespace Mango.Services.AuthAPI.Service
         private readonly JwtOptions _jwtOptions;
         public JwtTokenGenerator(IOptions<JwtOptions> jwtOptions)
         {
-                _jwtOptions = jwtOptions.Value;
+            _jwtOptions = jwtOptions.Value;
         }
-        public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string>roles)
+        public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
@@ -34,7 +34,7 @@ namespace Mango.Services.AuthAPI.Service
                 Issuer = _jwtOptions.Issuer,
                 Subject = new ClaimsIdentity(claimList),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

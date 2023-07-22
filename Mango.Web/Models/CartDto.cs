@@ -1,7 +1,4 @@
-﻿
-using System.Collections.Generic;
-
-namespace Mango.Web.Models
+﻿namespace Mango.Web.Models
 {
     public class CartDto
     {

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Extentions;
@@ -48,7 +49,7 @@ builder.Services.AddSwaggerGen(options =>
 
 });
 
-builder.Services.AddDbContextFactory<AppDbContext>(option =>
+builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
@@ -57,9 +58,9 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
+builder.Services.AddScoped<IMessageBus, MessageBus>();
 
-
-builder.Services.AddHttpClient("Product", u=> u.BaseAddress = 
+builder.Services.AddHttpClient("Product", u => u.BaseAddress =
 new Uri(builder.Configuration["ServiceUrls:ProductAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 
 builder.Services.AddHttpClient("Coupon", u => u.BaseAddress =

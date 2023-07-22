@@ -1,6 +1,5 @@
 ﻿using Mango.Services.AuthAPI.Models.Dto;
 using Mango.Services.AuthAPI.Service.IService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.AuthAPI.Controllers
@@ -13,7 +12,7 @@ namespace Mango.Services.AuthAPI.Controllers
         protected ResponseDto _response;
         public AuthAPIController(IAuthService authService)
         {
-                _authService = authService;
+            _authService = authService;
             _response = new ResponseDto();
         }
 
@@ -52,7 +51,7 @@ namespace Mango.Services.AuthAPI.Controllers
         [HttpPost("assignrole")]
         public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDTO model)
         {
-            var assignRoleSuccessful = await _authService.AssignRole(model.Email,model.Role.ToUpper());
+            var assignRoleSuccessful = await _authService.AssignRole(model.Email, model.Role.ToUpper());
 
             if (!assignRoleSuccessful)
             {
@@ -60,7 +59,7 @@ namespace Mango.Services.AuthAPI.Controllers
                 _response.Message = "Error Encountered";
                 return BadRequest(_response);
             }
-           
+
             return Ok(_response);
         }
     }

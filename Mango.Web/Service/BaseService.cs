@@ -2,7 +2,6 @@
 using Mango.Web.Service.IService;
 using Newtonsoft.Json;
 using System.Text;
-using System.Text.Json.Serialization;
 using static Mango.Web.Utility.SD;
 
 namespace Mango.Web.Service
@@ -11,12 +10,12 @@ namespace Mango.Web.Service
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ITokenProvider _tokenProvider;
-        public BaseService(IHttpClientFactory httpClientFactory , ITokenProvider tokenProvider)
+        public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider)
         {
-                _httpClientFactory = httpClientFactory;
-                _tokenProvider = tokenProvider;
+            _httpClientFactory = httpClientFactory;
+            _tokenProvider = tokenProvider;
         }
-        public async Task<ResponseDto> SendAsync(RequestDto requestDto , bool withBearer = true)
+        public async Task<ResponseDto> SendAsync(RequestDto requestDto, bool withBearer = true)
         {
             int num = ((int)Apitype.GET);
             try
@@ -68,7 +67,7 @@ namespace Mango.Web.Service
                     case System.Net.HttpStatusCode.InternalServerError:
                         return new() { IsSuccess = false, Message = "InternalServerError" };
 
-                    
+
                     default:
                         var apiContent = await apiResponse.Content.ReadAsStringAsync();
                         var apiResponseDto = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
@@ -85,7 +84,7 @@ namespace Mango.Web.Service
                 };
                 return dto; ;
             }
-           
+
 
         }
     }

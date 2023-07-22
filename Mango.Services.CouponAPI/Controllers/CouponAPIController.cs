@@ -28,10 +28,10 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 IEnumerable<Coupon> objList = _db.Coupons.ToList();
-                _response.Result =  _mapper.Map<IEnumerable<CouponDto>>(objList);
+                _response.Result = _mapper.Map<IEnumerable<CouponDto>>(objList);
                 return _response;
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.Message = ex.Message;
@@ -46,7 +46,7 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 Coupon obj = _db.Coupons.First(u => u.CouponId == id);
-               
+
                 _response.Result = _mapper.Map<CouponDto>(obj);
                 return _response;
             }
@@ -71,7 +71,7 @@ namespace Mango.Services.CouponAPI.Controllers
                     _response.Message = "No Data";
                 }
                 _response.Result = _mapper.Map<CouponDto>(obj);
-              
+
                 return _response;
             }
             catch (Exception ex)
@@ -83,8 +83,8 @@ namespace Mango.Services.CouponAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles ="ADMIN")]
-        public ResponseDto Post([FromBody]CouponDto couponDto)
+        [Authorize(Roles = "ADMIN")]
+        public ResponseDto Post([FromBody] CouponDto couponDto)
         {
             try
             {
@@ -131,14 +131,14 @@ namespace Mango.Services.CouponAPI.Controllers
                 Coupon obj = _db.Coupons.First(u => u.CouponId == id);
                 _db.Coupons.Remove(obj);
                 _db.SaveChanges();
-               
-              
+
+
             }
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
                 _response.Message = ex.Message;
-               
+
             }
             return _response;
         }

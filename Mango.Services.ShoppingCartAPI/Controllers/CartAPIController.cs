@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Model;
 using Mango.Services.ShoppingCartAPI.Model.Dto;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
 using Mango.Services.ShoppingCartAPI.Service.IService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers
@@ -23,17 +23,22 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private IMapper _mapper;
         private readonly IProductService _productService;
         private readonly ICouponService _couponService;
-        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService, ICouponService couponService)
+        private readonly IConfiguration _configuration;
+        private readonly IMessageBus _messageBus;
+        public CartAPIController(AppDbContext db, IMapper mapper, IProductService productService, ICouponService couponService,
+            IMessageBus messageBus, IConfiguration configuration)
         {
             _db = db;
             _response = new();
             _mapper = mapper;
             _productService = productService;
             _couponService = couponService;
+            _messageBus = messageBus;
+            _configuration = configuration;
         }
 
         [HttpPost("CartUpsert")]
-        public async Task<ResponseDto> CartUpsert([FromBody]CartDto cartDto)
+        public async Task<ResponseDto> CartUpsert([FromBody] CartDto cartDto)
         {
             try
             {
@@ -45,7 +50,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
 
                     CartHeader cartHeader = _mapper.Map<CartHeader>(cartDto.CartHeader);
                     _db.CartHeaders.Add(cartHeader);
-                   await  _db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
                     cartDto.CartDetails.First().CartHeaderId = cartHeader.CartHeaderId;
                     _db.CartDetails.Add(_mapper.Map<CartDetails>(cartDto.CartDetails.First()));
                     await _db.SaveChangesAsync();
@@ -54,7 +59,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 {
                     //if header is not null : check if details has same product
                     var cartDetailsFromDb = await _db.CartDetails.AsNoTracking().FirstOrDefaultAsync(
-                        u => u.ProductId == cartDto.CartDetails.First().ProductId && 
+                        u => u.ProductId == cartDto.CartDetails.First().ProductId &&
                         u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
 
                     if (cartDetailsFromDb == null)
@@ -92,7 +97,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("RemoveCart")]
-        public async Task<ResponseDto> RemoveCart([FromBody]int cartDetailsId)
+        public async Task<ResponseDto> RemoveCart([FromBody] int cartDetailsId)
         {
             try
             {
@@ -208,5 +213,24 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             }
             return _response;
         }
+
+
+        [HttpPost("EmailCartRequest")]
+        public async Task<ResponseDto> EmailCartRequest([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                await _messageBus.PublishMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue"));
+                return _response;
+            }
+            catch (System.Exception ex)
+            {
+
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
     }
 }

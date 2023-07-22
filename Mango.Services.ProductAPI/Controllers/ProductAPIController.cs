@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
 using Mango.Services.ProductAPI.Data;
+using Mango.Services.ProductAPI.Models;
 using Mango.Services.ProductAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using System;
-using Mango.Services.ProductAPI.Models;
 using System.Linq;
 
 namespace Mango.Services.ProductAPI.Controllers
@@ -66,7 +65,7 @@ namespace Mango.Services.ProductAPI.Controllers
         public ResponseDto Get(string CategoryName)
         {
 
-            
+
             try
             {
                 List<Product> obj = _db.Products.Where(u => u.CategoryName.ToLower() == CategoryName.ToLower()).ToList();

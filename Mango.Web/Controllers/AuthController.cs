@@ -32,27 +32,27 @@ namespace Mango.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginRequestDTO obj)
         {
-          
+
             ResponseDto responseDto = await _authService.LoginAsync(obj);
 
 
             if (responseDto != null && responseDto.IsSuccess)
             {
-                LoginResponseDTO loginResponseDTO = 
+                LoginResponseDTO loginResponseDTO =
                     JsonConvert.DeserializeObject<LoginResponseDTO>(Convert.ToString(responseDto.Result));
 
                 await SignInUser(loginResponseDTO);
                 _tokenProvider.SetToken(loginResponseDTO.Token);
 
                 TempData["success"] = "Login Successful";
-                return RedirectToAction("Index","Home");
+                return RedirectToAction("Index", "Home");
             }
             else
             {
                 TempData["error"] = responseDto.Message;
                 return View(obj);
             }
-               
+
         }
 
         [HttpGet]
@@ -81,18 +81,18 @@ namespace Mango.Web.Controllers
 
             if (result != null && result.IsSuccess)
             {
-               
+
                 assignRole = await _authService.AssignRoleAsync(obj);
                 if (assignRole != null && assignRole.IsSuccess)
                 {
                     TempData["success"] = "Registration Successful";
-                   return  RedirectToAction(nameof(Login));
+                    return RedirectToAction(nameof(Login));
                 }
             }
             else
             {
                 TempData["error"] = result.Message;
-               
+
             }
 
             var roleList = new List<SelectListItem>()
@@ -112,7 +112,7 @@ namespace Mango.Web.Controllers
         {
             await HttpContext.SignOutAsync();
             _tokenProvider.ClearToken();
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
         }
 
         private async Task SignInUser(LoginResponseDTO model)
@@ -121,7 +121,7 @@ namespace Mango.Web.Controllers
             var jwt = handler.ReadJwtToken(model.Token);
 
             var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-            identity.AddClaim(new Claim(JwtRegisteredClaimNames.Email, 
+            identity.AddClaim(new Claim(JwtRegisteredClaimNames.Email,
                 jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email).Value));
 
             identity.AddClaim(new Claim(JwtRegisteredClaimNames.Sub,
@@ -140,7 +140,7 @@ namespace Mango.Web.Controllers
 
 
             var principle = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,principle);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principle);
 
 
 
