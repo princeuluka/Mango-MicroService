@@ -1,6 +1,6 @@
 # 🥭 Mango Microservices — E-Commerce Platform
 
-A full-featured e-commerce web application built with **.NET 8** and a **microservices architecture**. Each business domain is isolated into its own independently deployable API service, communicating asynchronously via **Azure Service Bus** and synchronously via **HTTP/REST**.
+A full-featured e-commerce web application built with **.NET 7** and a **microservices architecture**. Each business domain is isolated into its own independently deployable API service, communicating asynchronously via **RabbitMQ** and synchronously via **HTTP/REST**.
 
 ---
 
@@ -25,7 +25,7 @@ A full-featured e-commerce web application built with **.NET 8** and a **microse
                          │
               ┌──────────▼──────────┐
               │  Mango.MessageBus   │
-              │  (Azure Service Bus)│
+              │     (RabbitMQ)      │
               └─────────────────────┘
 ```
 
@@ -40,8 +40,8 @@ A full-featured e-commerce web application built with **.NET 8** and a **microse
 | `Mango.Services.CouponAPI` | CRUD management for discount coupons, with Stripe integration for validation |
 | `Mango.Services.ProductAPI` | Product catalog management — create, read, update, delete products |
 | `Mango.Services.ShoppingCartAPI` | Cart management — add/remove items, apply coupons, and initiate checkout |
-| `Mango.Service.EmailAPI` | Listens to Service Bus messages and sends transactional order confirmation emails |
-| `Mango.MessageBus` | Shared library for publishing and consuming messages via Azure Service Bus |
+| `Mango.Service.EmailAPI` | Listens to RabbitMQ messages and sends transactional order confirmation emails |
+| `Mango.MessageBus` | Shared library for publishing and consuming messages via RabbitMQ |
 
 ---
 
@@ -54,7 +54,7 @@ A full-featured e-commerce web application built with **.NET 8** and a **microse
 | **ORM** | Entity Framework Core |
 | **Database** | SQL Server (per-service, isolated databases) |
 | **Authentication** | ASP.NET Core Identity + JWT Bearer Tokens |
-| **Messaging** | Azure Service Bus (async inter-service communication) |
+| **Messaging** | RabbitMQ (async inter-service communication) |
 | **Frontend** | ASP.NET Core MVC (Razor Views + Bootstrap) |
 | **API Docs** | Swagger / OpenAPI |
 | **Payments** | Stripe |
@@ -66,8 +66,8 @@ A full-featured e-commerce web application built with **.NET 8** and a **microse
 - **Microservices architecture** — each service owns its own database and can be deployed independently
 - **JWT authentication** — secure token-based auth with role support (Admin / Customer)
 - **Coupon & discount system** — apply coupon codes at checkout with real-time validation
-- **Async messaging** — order and checkout events are published to Azure Service Bus and consumed by downstream services (e.g., EmailAPI)
-- **Email notifications** — automated order confirmation emails triggered by Service Bus messages
+- **Async messaging** — order and checkout events are published to RabbitMQ and consumed by downstream services (e.g., EmailAPI)
+- **Email notifications** — automated order confirmation emails triggered by RabbitMQ messages
 - **Stripe payments** — integrated payment session creation at checkout
 - **Swagger UI** — every API service exposes interactive documentation at `/swagger`
 
@@ -77,10 +77,10 @@ A full-featured e-commerce web application built with **.NET 8** and a **microse
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [.NET 7 SDK](https://dotnet.microsoft.com/download)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server) (or SQL Server Express / LocalDB)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) or VS Code
-- An **Azure Service Bus** namespace (or use a local emulator for development)
+- [RabbitMQ](https://www.rabbitmq.com/) (use Docker Compose for local development)
 - A **Stripe** account (for payment features)
 
 ### 1. Clone the Repository
@@ -106,15 +106,29 @@ Each API project has its own `appsettings.json`. Update the following values per
       "Audience": "mango-client"
     }
   },
-  "MessageBus": {
-    "ConnectionString": "YOUR_AZURE_SERVICE_BUS_CONNECTION_STRING"
+  "RabbitMQ": {
+    "HostName": "localhost",
+    "Port": 5672,
+    "UserName": "guest",
+    "Password": "guest"
   }
 }
 ```
 
 > **Note:** Each service uses its own database. EF Core migrations are included — run them per project.
 
-### 3. Apply Migrations
+### 3. Start RabbitMQ
+
+Start RabbitMQ using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+- **AMQP Port:** `5672` (for applications)
+- **Management UI:** `http://localhost:15672` (guest/guest)
+
+### 4. Apply Migrations
 
 Run the following for each service that has a database:
 
@@ -126,7 +140,7 @@ dotnet ef database update
 
 Repeat for `AuthAPI`, `ProductAPI`, and `ShoppingCartAPI`.
 
-### 4. Run the Services
+### 5. Run the Services
 
 Open the solution (`Mango.sln`) in Visual Studio and configure **Multiple Startup Projects**, selecting all API services and `Mango.Web`. Then press **F5**.
 
@@ -141,7 +155,7 @@ dotnet run --project Mango.Service.EmailAPI
 dotnet run --project Mango.Web
 ```
 
-### 5. Access the Application
+### 6. Access the Application
 
 | Service | Default URL |
 |---|---|
@@ -166,8 +180,8 @@ dotnet run --project Mango.Web
 
 ## 📬 Async Messaging Flow
 
-1. When a cart checkout is initiated, `ShoppingCartAPI` publishes a message to **Azure Service Bus**.
-2. `EmailAPI` subscribes to the queue and sends an order confirmation email to the customer.
+1. When a cart checkout is initiated, `ShoppingCartAPI` publishes a message to **RabbitMQ**.
+2. `EmailAPI` consumes the message from the queue and sends an order confirmation email to the customer.
 
 ---
 
