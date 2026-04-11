@@ -1,72 +1,68 @@
-﻿using Azure.Messaging.ServiceBus;
-using Mango.Service.EmailAPI.Services;
+﻿using Mango.Service.EmailAPI.Services;
 using Mango.Services.EmailAPI.Models.Dto;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 
 namespace Mango.Service.EmailAPI.Messaging
 {
-    public class AzureServiceBusConsumer : IAzureServiceBusConsumer
+    public class RabbitMQConsumer : IRabbitMQConsumer
     {
-        private readonly string serviceBusConnectionString;
-        private readonly string emailCartQueue;
         private readonly IConfiguration? _configuration;
-        private readonly ServiceBusProcessor _emailCartProcessor;
         private readonly EmailService _emailService;
+        private readonly string _emailCartQueue;
+        private IConnection? _connection;
+        private IModel? _channel;
 
-        public AzureServiceBusConsumer(IConfiguration? configuration, EmailService emailService)
+        public RabbitMQConsumer(IConfiguration? configuration, EmailService emailService)
         {
             _configuration = configuration;
-            serviceBusConnectionString = _configuration.GetValue<string>("ServiceBusConnectionString");
-
-            emailCartQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue");
-
-            var client = new ServiceBusClient(serviceBusConnectionString);
-            _emailCartProcessor = client.CreateProcessor(emailCartQueue);
             _emailService = emailService;
+            _emailCartQueue = _configuration?.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue") ?? "emailshoppingcart";
         }
 
-        public async Task Start()
+        public Task Start()
         {
-            _emailCartProcessor.ProcessMessageAsync += OnEmailCartRequestRecieved;
-            _emailCartProcessor.ProcessMessageAsync += ErrorHandler;
-            await _emailCartProcessor.StartProcessingAsync();
+            var factory = new ConnectionFactory
+            {
+                HostName = _configuration?.GetValue<string>("MessageBus:Host") ?? "localhost",
+                Port = int.TryParse(_configuration?.GetValue<string>("MessageBus:Port"), out var p) ? p : 5672,
+                UserName = _configuration?.GetValue<string>("MessageBus:UserName") ?? "guest",
+                Password = _configuration?.GetValue<string>("MessageBus:Password") ?? "guest"
+            };
+            _connection = factory.CreateConnection();
+            _channel = _connection.CreateModel();
 
-        }
-        public async Task Stop()
-        {
-            await _emailCartProcessor.StopProcessingAsync();
-            await _emailCartProcessor.DisposeAsync();
-        }
+            _channel.QueueDeclare(queue: _emailCartQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
-        private Task ErrorHandler(ProcessMessageEventArgs args)
-        {
-            Console.WriteLine(args.Message.ToString());
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.Received += async (sender, ea) =>
+            {
+                try
+                {
+                    var body = ea.Body.ToArray();
+                    var json = Encoding.UTF8.GetString(body);
+                    var cartDto = JsonConvert.DeserializeObject<CartDto>(json);
+                    await _emailService.EmailCartAndLog(cartDto);
+                    _channel.BasicAck(ea.DeliveryTag, false);
+                }
+                catch
+                {
+                    _channel.BasicNack(ea.DeliveryTag, false, true);
+                    throw;
+                }
+            };
+
+            _channel.BasicConsume(queue: _emailCartQueue, autoAck: false, consumer: consumer);
             return Task.CompletedTask;
         }
 
-        private async Task OnEmailCartRequestRecieved(ProcessMessageEventArgs args)
+        public Task Stop()
         {
-            // this is where you will recieve the message
-            var message = args.Message;
-            var body = Encoding.UTF8.GetString(message.Body);
-
-            CartDto objMessage = JsonConvert.DeserializeObject<CartDto>(body);
-            try
-            {
-                // TODO - try to log email
-               await  _emailService.EmailCartAndLog(objMessage);
-                await args.CompleteMessageAsync(args.Message);
-
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-
+            _channel?.Close();
+            _connection?.Close();
+            return Task.CompletedTask;
         }
-
-        
     }
 }
