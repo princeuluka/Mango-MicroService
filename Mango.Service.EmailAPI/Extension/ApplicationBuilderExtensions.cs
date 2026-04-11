@@ -1,14 +1,14 @@
-﻿using Mango.Service.EmailAPI.Messaging;
+using Mango.Service.EmailAPI.Messaging;
 
 namespace Mango.Service.EmailAPI.Extension
 {
     public static class ApplicationBuilderExtensions
     {
 
-        private static IAzureServiceBusConsumer? serviceBusConsumer { get; set; }
-        public static IApplicationBuilder UseAzureServiceBusConsumer(this IApplicationBuilder app)
+        private static IMessageConsumer? messageConsumer { get; set; }
+        public static IApplicationBuilder UseRabbitMQConsumer(this IApplicationBuilder app)
         {
-            serviceBusConsumer = app.ApplicationServices.GetService<IAzureServiceBusConsumer>();
+            messageConsumer = app.ApplicationServices.GetService<IMessageConsumer>();
             var hostApplicationLife = app.ApplicationServices.GetService<IHostApplicationLifetime>();
 
 
@@ -20,12 +20,12 @@ namespace Mango.Service.EmailAPI.Extension
 
         private static void OnStop()
         {
-            serviceBusConsumer?.Stop();
+            messageConsumer?.Stop();
         }
 
         private static void OnStart()
         {
-            serviceBusConsumer?.Start();
+            messageConsumer?.Start();
         }
     }
 }

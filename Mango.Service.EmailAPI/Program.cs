@@ -23,7 +23,7 @@ builder.Services.AddSingleton(new EmailService(optionBuilder.Options));
 
 
 
-builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
+builder.Services.AddSingleton<IMessageConsumer, RabbitMQConsumer>();
 
 
 var app = builder.Build();
@@ -41,7 +41,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseAzureServiceBusConsumer();
+app.UseRabbitMQConsumer();
 
 ApplyMigration();
 

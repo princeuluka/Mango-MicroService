@@ -1,25 +1,60 @@
-﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
 using System.Text;
 
 namespace Mango.MessageBus
 {
     public class MessageBus : IMessageBus
     {
-        private readonly string connectionString = "Endpoint=sb://mangoweb-prince.servicebus.windows.net/;SharedAccessKeyName=RootManagedSharedAccessKey;SharedAccessKey=P3LDXgmp8RchqqwsqhIQ3GkfP5+9HWsNo+ASbPGjlFU=;EntityPath=emailshoppingcart";
-        public async Task PublishMessage(object Message, string topic_queue_Name)
+        private readonly IConfiguration _configuration;
+        private readonly IConnection _connection;
+        private readonly IModel _channel;
+
+        public MessageBus(IConfiguration configuration)
         {
-            await using var client = new ServiceBusClient(connectionString);
-
-            ServiceBusSender sender = client.CreateSender(topic_queue_Name);
-            var jsonMessage = JsonConvert.SerializeObject(Message);
-            ServiceBusMessage finalMessage = new ServiceBusMessage(Encoding.UTF8.GetBytes(jsonMessage))
+            _configuration = configuration;
+            var factory = new ConnectionFactory()
             {
-                CorrelationId = Guid.NewGuid().ToString()
+                HostName = _configuration["RabbitMQ:HostName"],
+                UserName = _configuration["RabbitMQ:UserName"],
+                Password = _configuration["RabbitMQ:Password"]
             };
+            
+            var port = _configuration.GetValue<int?>("RabbitMQ:Port");
+            if (port.HasValue)
+            {
+                factory.Port = port.Value;
+            }
 
-            await sender.SendMessageAsync(finalMessage);
-            await client.DisposeAsync();
+            _connection = factory.CreateConnection();
+            _channel = _connection.CreateModel();
+        }
+
+        public async Task PublishMessage(object Message, string queueName)
+        {
+            _channel.QueueDeclare(
+                queue: queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null
+            );
+
+            var jsonMessage = JsonConvert.SerializeObject(Message);
+            var body = Encoding.UTF8.GetBytes(jsonMessage);
+
+            var properties = _channel.CreateBasicProperties();
+            properties.Persistent = true;
+
+            _channel.BasicPublish(
+                exchange: "",
+                routingKey: queueName,
+                basicProperties: properties,
+                body: body
+            );
+
+            await Task.CompletedTask;
         }
     }
 }
