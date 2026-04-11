@@ -29,7 +29,8 @@ namespace Mango.Service.EmailAPI.Messaging
                 HostName = _configuration?.GetValue<string>("MessageBus:Host") ?? "localhost",
                 Port = int.TryParse(_configuration?.GetValue<string>("MessageBus:Port"), out var p) ? p : 5672,
                 UserName = _configuration?.GetValue<string>("MessageBus:UserName") ?? "guest",
-                Password = _configuration?.GetValue<string>("MessageBus:Password") ?? "guest"
+                Password = _configuration?.GetValue<string>("MessageBus:Password") ?? "guest",
+                DispatchConsumersAsync = true
             };
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
