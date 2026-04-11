@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Text;
@@ -7,33 +6,18 @@ namespace Mango.MessageBus
 {
     public class MessageBus : IMessageBus
     {
-        private readonly IConfiguration _configuration;
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
+        private readonly IRabbitMQConnection _connection;
 
-        public MessageBus(IConfiguration configuration)
+        public MessageBus(IRabbitMQConnection connection)
         {
-            _configuration = configuration;
-            var factory = new ConnectionFactory()
-            {
-                HostName = _configuration["RabbitMQ:HostName"],
-                UserName = _configuration["RabbitMQ:UserName"],
-                Password = _configuration["RabbitMQ:Password"]
-            };
-            
-            var port = _configuration.GetValue<int?>("RabbitMQ:Port");
-            if (port.HasValue)
-            {
-                factory.Port = port.Value;
-            }
-
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            _connection = connection;
         }
 
         public async Task PublishMessage(object Message, string queueName)
         {
-            _channel.QueueDeclare(
+            using var channel = _connection.CreateChannel();
+            
+            channel.QueueDeclare(
                 queue: queueName,
                 durable: true,
                 exclusive: false,
@@ -44,10 +28,10 @@ namespace Mango.MessageBus
             var jsonMessage = JsonConvert.SerializeObject(Message);
             var body = Encoding.UTF8.GetBytes(jsonMessage);
 
-            var properties = _channel.CreateBasicProperties();
+            var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
 
-            _channel.BasicPublish(
+            channel.BasicPublish(
                 exchange: "",
                 routingKey: queueName,
                 basicProperties: properties,

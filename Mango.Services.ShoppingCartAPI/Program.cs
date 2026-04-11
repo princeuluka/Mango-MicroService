@@ -58,7 +58,8 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
-builder.Services.AddScoped<IMessageBus, MessageBus>();
+builder.Services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
+builder.Services.AddSingleton<IMessageBus, MessageBus>();
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress =
 new Uri(builder.Configuration["ServiceUrls:ProductAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();

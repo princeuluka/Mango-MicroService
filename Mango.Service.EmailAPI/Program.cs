@@ -1,3 +1,4 @@
+using Mango.MessageBus;
 using Mango.Service.EmailAPI.Extension;
 using Mango.Service.EmailAPI.Messaging;
 using Mango.Service.EmailAPI.Services;
@@ -21,8 +22,7 @@ var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
 optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 builder.Services.AddSingleton(new EmailService(optionBuilder.Options));
 
-
-
+builder.Services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
 builder.Services.AddSingleton<IMessageConsumer, RabbitMQConsumer>();
 
 
