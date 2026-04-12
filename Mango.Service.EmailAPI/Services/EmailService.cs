@@ -34,6 +34,37 @@ namespace Mango.Service.EmailAPI.Services
             await LogAndEmail(message.ToString(),cartDto.CartHeader.Email);
         }
 
+        public async Task EmailOrderConfirmationAndLog(OrderHeaderDto orderHeaderDto)
+        {
+            StringBuilder message = new StringBuilder();
+
+            message.AppendLine("<br/>Order Confirmation");
+            message.AppendLine("<br/>Order ID: " + orderHeaderDto.OrderHeaderId);
+            message.AppendLine("<br/>Order Status: " + orderHeaderDto.OrderStatus);
+            message.AppendLine("<br/>Order Total: " + orderHeaderDto.OrderTotal);
+            if (orderHeaderDto.Discount > 0)
+            {
+                message.AppendLine("<br/>Discount Applied: " + orderHeaderDto.Discount);
+            }
+            if (!string.IsNullOrEmpty(orderHeaderDto.CouponCode))
+            {
+                message.AppendLine("<br/>Coupon Code: " + orderHeaderDto.CouponCode);
+            }
+            message.AppendLine("<br/>");
+            message.AppendLine("<ul>");
+            if (orderHeaderDto.OrderDetails != null)
+            {
+                foreach (var item in orderHeaderDto.OrderDetails)
+                {
+                    message.AppendLine("<li>");
+                    message.AppendLine(item.ProductName + " x " + item.Count + " @ " + item.Price);
+                    message.AppendLine("</li>");
+                }
+            }
+            message.AppendLine("</ul>");
+            await LogAndEmail(message.ToString(), orderHeaderDto.PickupEmail);
+        }
+
 
         private async Task<bool> LogAndEmail(string message , string email)
         {

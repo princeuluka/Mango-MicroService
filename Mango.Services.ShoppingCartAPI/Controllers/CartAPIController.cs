@@ -232,5 +232,44 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             return _response;
         }
 
+        [HttpPost("Checkout")]
+        public async Task<ResponseDto> Checkout([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                await _messageBus.PublishMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:CheckoutQueue"));
+                return _response;
+            }
+            catch (System.Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
+        [HttpPost("ClearCart")]
+        public async Task<ResponseDto> ClearCart([FromBody] string userId)
+        {
+            try
+            {
+                var cartHeaderFromDb = await _db.CartHeaders.FirstOrDefaultAsync(u => u.UserId == userId);
+                if (cartHeaderFromDb != null)
+                {
+                    var cartDetails = _db.CartDetails.Where(u => u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
+                    _db.CartDetails.RemoveRange(cartDetails);
+                    _db.CartHeaders.Remove(cartHeaderFromDb);
+                    await _db.SaveChangesAsync();
+                }
+                _response.IsSuccess = true;
+            }
+            catch (System.Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
     }
 }

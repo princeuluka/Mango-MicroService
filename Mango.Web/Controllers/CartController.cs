@@ -108,5 +108,27 @@ namespace Mango.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Checkout(CartDto cartDto)
+        {
+            CartDto cart = await LoadCartDtoBasedOnLoggedInUser();
+            cart.CartHeader.Email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
+            cart.CartHeader.FirstName = User.Claims.Where(u => u.Type == "name")?.FirstOrDefault()?.Value;
+            cart.CartHeader.Phone = User.Claims.Where(u => u.Type == "phoneNumber")?.FirstOrDefault()?.Value;
+            
+            ResponseDto response = await _cartService.Checkout(cart);
+            if (response != null & response.IsSuccess)
+            {
+                TempData["success"] = "Order placed successfully!";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            else
+            {
+                TempData["error"] = response?.Message ?? "Checkout failed";
+                return RedirectToAction(nameof(CartIndex));
+            }
+        }
+
     }
 }
