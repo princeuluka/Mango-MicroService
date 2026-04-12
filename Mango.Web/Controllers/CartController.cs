@@ -108,5 +108,27 @@ namespace Mango.Web.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Checkout(CartDto cartDto)
+        {
+            var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
+            cartDto.CartHeader.FirstName = User.Claims.Where(u => u.Type == "given_name")?.FirstOrDefault()?.Value;
+            cartDto.CartHeader.LastName = User.Claims.Where(u => u.Type == "family_name")?.FirstOrDefault()?.Value;
+            cartDto.CartHeader.Email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
+            cartDto.CartHeader.Phone = User.Claims.Where(u => u.Type == "phone_number")?.FirstOrDefault()?.Value;
+
+            ResponseDto response = await _cartService.CheckoutAsync(cartDto);
+            if (response != null & response.IsSuccess)
+            {
+                TempData["success"] = "Checkout will be processed and order created shortly.";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            else
+            {
+                TempData["error"] = response?.Message;
+                return RedirectToAction(nameof(CartIndex));
+            }
+        }
+
     }
 }

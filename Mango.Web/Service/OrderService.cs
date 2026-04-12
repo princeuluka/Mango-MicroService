@@ -1,74 +1,72 @@
-﻿using Mango.Web.Models;
+using Mango.Web.Models;
 using Mango.Web.Service.IService;
 using Mango.Web.Utility;
 
 namespace Mango.Web.Service
 {
-    public class CartService : ICartService
+    public class OrderService : IOrderService
     {
         private readonly IBaseService _baseService;
-        public CartService(IBaseService baseService)
+        public OrderService(IBaseService baseService)
         {
             _baseService = baseService;
         }
-        public async Task<ResponseDto> ApplyCouponAsync(CartDto cartDto)
+
+        public async Task<ResponseDto> CreateOrder(CartDto cartDto)
         {
             return await _baseService.SendAsync(new RequestDto()
             {
                 ApiType = Utility.SD.Apitype.POST,
-                Url = SD.CartAPIBase + "/api/cart/ApplyCoupon",
+                Url = SD.OrderAPIBase + "/api/order/CreateOrder",
                 Data = cartDto
-
             });
         }
 
-        public async Task<ResponseDto> EmailCart(CartDto cartDto)
+        public async Task<ResponseDto> CreateStripeSession(StripeRequestDto stripeRequestDto)
         {
             return await _baseService.SendAsync(new RequestDto()
             {
                 ApiType = Utility.SD.Apitype.POST,
-                Url = SD.CartAPIBase + "/api/cart/EmailCartRequest",
-                Data = cartDto
-
+                Url = SD.OrderAPIBase + "/api/order/CreateStripeSession",
+                Data = stripeRequestDto
             });
         }
 
-        public async Task<ResponseDto> GetCartByUSerIdAsync(string userId)
+        public async Task<ResponseDto> GetOrder(int orderId)
         {
             return await _baseService.SendAsync(new RequestDto()
             {
                 ApiType = Utility.SD.Apitype.GET,
-                Url = SD.CartAPIBase + $"/api/cart/GetCart/{userId}",
+                Url = SD.OrderAPIBase + $"/api/order/GetOrder/{orderId}"
             });
         }
 
-        public async Task<ResponseDto> RemoveFromCartAsync(string cartDetailsId)
+        public async Task<ResponseDto> GetOrders(string? userId)
+        {
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = Utility.SD.Apitype.GET,
+                Url = SD.OrderAPIBase + $"/api/order/GetOrders?userId={userId}"
+            });
+        }
+
+        public async Task<ResponseDto> UpdateOrderStatus(int orderId, string newStatus)
         {
             return await _baseService.SendAsync(new RequestDto()
             {
                 ApiType = Utility.SD.Apitype.POST,
-                Url = SD.CartAPIBase + $"/api/cart/RemoveCart",
-                Data = cartDetailsId
+                Url = SD.OrderAPIBase + $"/api/order/UpdateOrderStatus/{orderId}",
+                Data = newStatus
             });
         }
 
-        public async Task<ResponseDto> UpsertCartAsync(CartDto cartDto)
+        public async Task<ResponseDto> ValidateStripeSession(int orderHeaderId)
         {
             return await _baseService.SendAsync(new RequestDto()
             {
                 ApiType = Utility.SD.Apitype.POST,
-                Url = SD.CartAPIBase + $"/api/cart/CartUpsert",
-                Data = cartDto
-            });
-        }
-
-        public async Task<ResponseDto> CheckoutAsync(CartDto cartDto)
-        {
-            return await _baseService.SendAsync(new RequestDto()
-            {
-                ApiType = Utility.SD.Apitype.POST,
-                Url = SD.CartAPIBase + $"/api/cart/Checkout",
-                Data = cartDto
+                Url = SD.OrderAPIBase + "/api/order/ValidateStripeSession",
+                Data = orderHeaderId
             });
         }
     }
