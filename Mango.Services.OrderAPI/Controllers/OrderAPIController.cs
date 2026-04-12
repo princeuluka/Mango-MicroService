@@ -110,13 +110,29 @@ namespace Mango.Services.OrderAPI.Controllers
             return _response;
         }
 
+        private readonly string[] _validStatuses = { "Pending", "Approved", "ReadyForPickup", "Completed", "Cancelled" };
+
         [HttpPost("UpdateOrderStatus/{orderId}")]
         [Authorize]
         public async Task<ResponseDto> UpdateOrderStatus(int orderId, [FromBody] string newStatus)
         {
             try
             {
+                if (!_validStatuses.Contains(newStatus))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = "Invalid status value";
+                    return _response;
+                }
+
                 OrderHeader orderHeader = await _db.OrderHeaders.FirstAsync(u => u.OrderHeaderId == orderId);
+                if (!IsValidStatusTransition(orderHeader.Status, newStatus))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = $"Invalid status transition from {orderHeader.Status} to {newStatus}";
+                    return _response;
+                }
+
                 orderHeader.Status = newStatus;
                 _db.OrderHeaders.Update(orderHeader);
                 await _db.SaveChangesAsync();
@@ -128,6 +144,15 @@ namespace Mango.Services.OrderAPI.Controllers
                 _response.Message = ex.Message;
             }
             return _response;
+        }
+
+        private bool IsValidStatusTransition(string currentStatus, string newStatus)
+        {
+            if (currentStatus == "Completed" || currentStatus == "Cancelled") return false;
+            if (currentStatus == "Pending" && (newStatus == "Approved" || newStatus == "Cancelled")) return true;
+            if (currentStatus == "Approved" && (newStatus == "ReadyForPickup" || newStatus == "Cancelled")) return true;
+            if (currentStatus == "ReadyForPickup" && (newStatus == "Completed" || newStatus == "Cancelled")) return true;
+            return false;
         }
     }
 }
