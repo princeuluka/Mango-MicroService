@@ -10,9 +10,11 @@ namespace Mango.Web.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
-        public CartController(ICartService cartService)
+        private readonly IOrderService _orderService;
+        public CartController(ICartService cartService, IOrderService orderService)
         {
             _cartService = cartService;
+            _orderService = orderService;
         }
         [Authorize]
         public async Task<IActionResult> CartIndex()
@@ -105,6 +107,31 @@ namespace Mango.Web.Controllers
             {
                 TempData["error"] = response.Message;
                 return View();
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Checkout(CartDto cartDto)
+        {
+            CartDto cart = await LoadCartDtoBasedOnLoggedInUser();
+            cart.CartHeader.FirstName = User.Claims.Where(u => u.Type == "name")?.FirstOrDefault()?.Value; // or from form
+            cart.CartHeader.LastName = "";
+            cart.CartHeader.Phone = User.Claims.Where(u => u.Type == "phone")?.FirstOrDefault()?.Value ?? "";
+            cart.CartHeader.Email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
+            cart.CartHeader.PickupDateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            var response = await _orderService.CreateOrder(cart);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Order placed successfully.";
+                // TODO: integrate Stripe payment redirect here
+                return RedirectToAction(nameof(CartIndex));
+            }
+            else
+            {
+                TempData["error"] = response?.Message ?? "Error placing order";
+                return RedirectToAction(nameof(CartIndex));
             }
         }
 
