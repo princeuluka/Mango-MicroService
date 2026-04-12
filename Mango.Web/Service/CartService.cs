@@ -61,5 +61,15 @@ namespace Mango.Web.Service
                 Data = cartDto
             });
         }
+
+        public async Task<ResponseDto> Checkout(CartDto cartDto)
+        {
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = Utility.SD.Apitype.POST,
+                Url = SD.CartAPIBase + "/api/cart/Checkout",
+                Data = cartDto
+            });
+        }
     }
 }

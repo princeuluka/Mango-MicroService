@@ -88,6 +88,27 @@ namespace Mango.Web.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Checkout(CartDto cartDto)
+        {
+            CartDto cart = await LoadCartDtoBasedOnLoggedInUser();
+            cart.CartHeader.Email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
+            cart.CartHeader.FirstName = User.Claims.Where(u => u.Type == "given_name")?.FirstOrDefault()?.Value;
+            cart.CartHeader.LastName = User.Claims.Where(u => u.Type == "family_name")?.FirstOrDefault()?.Value;
+            cart.CartHeader.Phone = User.Claims.Where(u => u.Type == "phone_number")?.FirstOrDefault()?.Value;
+            ResponseDto response = await _cartService.Checkout(cart);
+            if (response != null & response.IsSuccess)
+            {
+                TempData["success"] = "Order placed successfully!";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            else
+            {
+                TempData["error"] = response.Message;
+                return View();
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> RemoveCoupon(CartDto cartDto)

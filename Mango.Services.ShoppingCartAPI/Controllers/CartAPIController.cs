@@ -232,5 +232,21 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             return _response;
         }
 
+        [HttpPost("Checkout")]
+        public async Task<ResponseDto> Checkout([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                await _messageBus.PublishMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:CheckoutQueue"));
+                return _response;
+            }
+            catch (System.Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message.ToString();
+            }
+            return _response;
+        }
+
     }
 }
