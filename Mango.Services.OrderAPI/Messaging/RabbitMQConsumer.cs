@@ -83,7 +83,7 @@ namespace Mango.Services.OrderAPI.Messaging
                 CouponCode = cartDto.CartHeader.CouponCode,
                 Discount = cartDto.CartHeader.Discount,
                 OrderTotal = cartDto.CartHeader.CartTotal,
-                OrderStatus = "Pending",
+                OrderStatus = OrderStatus.Pending,
                 PaymentStatus = "Pending",
                 CreatedAt = DateTime.Now,
                 FirstName = cartDto.CartHeader.FirstName,

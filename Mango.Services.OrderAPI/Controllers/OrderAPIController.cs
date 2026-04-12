@@ -75,7 +75,7 @@ namespace Mango.Services.OrderAPI.Controllers
             {
                 var orderHeader = _mapper.Map<OrderHeader>(orderDto.OrderHeader);
                 orderHeader.CreatedAt = DateTime.Now;
-                orderHeader.OrderStatus = "Pending";
+                orderHeader.OrderStatus = OrderStatus.Pending;
                 orderHeader.PaymentStatus = "Pending";
 
                 _db.OrderHeaders.Add(orderHeader);
@@ -105,11 +105,25 @@ namespace Mango.Services.OrderAPI.Controllers
         {
             try
             {
+                if (!OrderStatus.IsValid(status))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = $"Invalid order status: {status}";
+                    return _response;
+                }
+
                 var orderHeader = await _db.OrderHeaders.FirstOrDefaultAsync(o => o.OrderHeaderId == orderId);
                 if (orderHeader == null)
                 {
                     _response.IsSuccess = false;
                     _response.Message = "Order not found";
+                    return _response;
+                }
+
+                if (!OrderStatus.CanTransition(orderHeader.OrderStatus, status))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = $"Cannot transition order from {orderHeader.OrderStatus} to {status}";
                     return _response;
                 }
 
@@ -139,14 +153,14 @@ namespace Mango.Services.OrderAPI.Controllers
                     return _response;
                 }
 
-                if (orderHeader.OrderStatus == "Shipped" || orderHeader.OrderStatus == "Delivered")
+                if (!OrderStatus.CanCancel(orderHeader.OrderStatus))
                 {
                     _response.IsSuccess = false;
-                    _response.Message = "Cannot cancel order that has been shipped or delivered";
+                    _response.Message = $"Cannot cancel order with status {orderHeader.OrderStatus}";
                     return _response;
                 }
 
-                orderHeader.OrderStatus = "Cancelled";
+                orderHeader.OrderStatus = OrderStatus.Cancelled;
                 await _db.SaveChangesAsync();
                 _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
             }
@@ -173,9 +187,9 @@ namespace Mango.Services.OrderAPI.Controllers
                 }
 
                 orderHeader.PaymentStatus = paymentStatus;
-                if (paymentStatus == "Approved")
+                if (paymentStatus == "Approved" && orderHeader.OrderStatus == OrderStatus.Pending)
                 {
-                    orderHeader.OrderStatus = "Confirmed";
+                    orderHeader.OrderStatus = OrderStatus.Confirmed;
                 }
                 await _db.SaveChangesAsync();
                 _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
