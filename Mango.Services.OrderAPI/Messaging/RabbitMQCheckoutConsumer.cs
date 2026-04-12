@@ -6,6 +6,7 @@ using Mango.Services.OrderAPI.Models.Dto;
 using Mango.Services.OrderAPI.Service.IService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,10 +17,7 @@ namespace Mango.Services.OrderAPI.Messaging
     public class RabbitMQCheckoutConsumer : IRabbitMQCheckoutConsumer
     {
         private readonly IConfiguration _configuration;
-        private readonly AppDbContext _db;
-        private readonly IProductService _productService;
-        private readonly IMapper _mapper;
-        private readonly IMessageBus _messageBus;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly string _checkoutQueue;
         private readonly string _orderConfirmedQueue;
         private readonly string _emailOrderQueue;
@@ -28,16 +26,10 @@ namespace Mango.Services.OrderAPI.Messaging
 
         public RabbitMQCheckoutConsumer(
             IConfiguration configuration,
-            AppDbContext db,
-            IProductService productService,
-            IMapper mapper,
-            IMessageBus messageBus)
+            IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
-            _db = db;
-            _productService = productService;
-            _mapper = mapper;
-            _messageBus = messageBus;
+            _scopeFactory = scopeFactory;
             _checkoutQueue = _configuration.GetValue<string>("TopicAndQueueNames:CheckoutQueue") ?? "checkoutqueue";
             _orderConfirmedQueue = _configuration.GetValue<string>("TopicAndQueueNames:OrderConfirmedQueue") ?? "orderconfirmedqueue";
             _emailOrderQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailOrderQueue") ?? "emailorderqueue";
@@ -82,13 +74,19 @@ namespace Mango.Services.OrderAPI.Messaging
 
         private async Task ProcessCheckout(CartDto cartDto)
         {
-            var orderHeader = _mapper.Map<OrderHeader>(cartDto.CartHeader);
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
+            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+            var messageBus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+
+            var orderHeader = mapper.Map<OrderHeader>(cartDto.CartHeader);
             orderHeader.OrderTime = DateTime.UtcNow;
-            orderHeader.OrderStatus = "Pending";
+            orderHeader.OrderStatus = OrderStatus.Pending;
             orderHeader.PaymentStatus = "Pending";
 
             // Fetch products to verify prices
-            var products = await _productService.GetProducts();
+            var products = await productService.GetProducts();
             var productDict = products.ToDictionary(p => p.ProductId);
 
             var orderDetailsList = new List<OrderDetails>();
@@ -101,7 +99,7 @@ namespace Mango.Services.OrderAPI.Messaging
                     {
                         ProductId = cartDetail.ProductId,
                         ProductName = product.Name,
-                        Price = product.Price, // Use current price from ProductAPI
+                        Price = product.Price,
                         Count = cartDetail.Count
                     };
                     orderDetailsList.Add(orderDetail);
@@ -115,15 +113,15 @@ namespace Mango.Services.OrderAPI.Messaging
             orderHeader.Discount = cartDto.CartHeader.Discount;
             orderHeader.OrderTotal -= orderHeader.Discount;
 
-            _db.OrderHeaders.Add(orderHeader);
-            await _db.SaveChangesAsync();
+            db.OrderHeaders.Add(orderHeader);
+            await db.SaveChangesAsync();
 
             // Publish order confirmed event for ShoppingCartAPI to clear cart
-            var orderHeaderDto = _mapper.Map<OrderHeaderDto>(orderHeader);
-            await _messageBus.PublishMessage(orderHeaderDto, _orderConfirmedQueue);
+            var orderHeaderDto = mapper.Map<OrderHeaderDto>(orderHeader);
+            await messageBus.PublishMessage(orderHeaderDto, _orderConfirmedQueue);
 
             // Publish to email queue for order confirmation email
-            await _messageBus.PublishMessage(orderHeaderDto, _emailOrderQueue);
+            await messageBus.PublishMessage(orderHeaderDto, _emailOrderQueue);
         }
 
         public Task Stop()

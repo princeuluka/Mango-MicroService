@@ -80,7 +80,7 @@ namespace Mango.Services.OrderAPI.Controllers
             {
                 var orderHeader = _mapper.Map<OrderHeader>(orderHeaderDto);
                 orderHeader.OrderTime = DateTime.UtcNow;
-                orderHeader.OrderStatus = "Pending";
+                orderHeader.OrderStatus = OrderStatus.Pending;
                 orderHeader.PaymentStatus = "Pending";
 
                 _db.OrderHeaders.Add(orderHeader);
@@ -106,7 +106,7 @@ namespace Mango.Services.OrderAPI.Controllers
 
         [Authorize]
         [HttpPut("UpdateOrderStatus/{id}")]
-        public async Task<ResponseDto> UpdateOrderStatus(int id, [FromBody] string status)
+        public async Task<ResponseDto> UpdateOrderStatus(int id, [FromBody] StatusUpdateDto statusUpdate)
         {
             try
             {
@@ -118,7 +118,25 @@ namespace Mango.Services.OrderAPI.Controllers
                     return _response;
                 }
 
-                orderHeader.OrderStatus = status;
+                var newStatus = statusUpdate.Status;
+
+                // Validate that the new status is a valid status
+                if (!OrderStatus.IsValidStatus(newStatus))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = $"Invalid order status: {newStatus}. Valid statuses are: {OrderStatus.Pending}, {OrderStatus.Confirmed}, {OrderStatus.Shipped}, {OrderStatus.Delivered}, {OrderStatus.Cancelled}";
+                    return _response;
+                }
+
+                // Validate that the transition is allowed
+                if (!OrderStatus.IsValidTransition(orderHeader.OrderStatus, newStatus))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = $"Cannot transition order from '{orderHeader.OrderStatus}' to '{newStatus}'";
+                    return _response;
+                }
+
+                orderHeader.OrderStatus = newStatus;
                 _db.OrderHeaders.Update(orderHeader);
                 await _db.SaveChangesAsync();
 
@@ -146,14 +164,14 @@ namespace Mango.Services.OrderAPI.Controllers
                     return _response;
                 }
 
-                if (orderHeader.OrderStatus == "Shipped" || orderHeader.OrderStatus == "Delivered")
+                if (!OrderStatus.IsValidTransition(orderHeader.OrderStatus, OrderStatus.Cancelled))
                 {
                     _response.IsSuccess = false;
-                    _response.Message = "Cannot cancel order that is already shipped or delivered";
+                    _response.Message = $"Cannot cancel order with status '{orderHeader.OrderStatus}'. Only {OrderStatus.Pending} or {OrderStatus.Confirmed} orders can be cancelled.";
                     return _response;
                 }
 
-                orderHeader.OrderStatus = "Cancelled";
+                orderHeader.OrderStatus = OrderStatus.Cancelled;
                 _db.OrderHeaders.Update(orderHeader);
                 await _db.SaveChangesAsync();
 
@@ -209,10 +227,18 @@ namespace Mango.Services.OrderAPI.Controllers
                     return _response;
                 }
 
+                // Validate transition to Confirmed
+                if (!OrderStatus.IsValidTransition(orderHeader.OrderStatus, OrderStatus.Confirmed))
+                {
+                    _response.IsSuccess = false;
+                    _response.Message = $"Cannot confirm order with status '{orderHeader.OrderStatus}'";
+                    return _response;
+                }
+
                 // Stripe validation would go here
                 // For now, just mark as approved
                 orderHeader.PaymentStatus = "Approved";
-                orderHeader.OrderStatus = "Confirmed";
+                orderHeader.OrderStatus = OrderStatus.Confirmed;
                 _db.OrderHeaders.Update(orderHeader);
                 await _db.SaveChangesAsync();
 

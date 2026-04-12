@@ -2,6 +2,7 @@ using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -14,15 +15,15 @@ namespace Mango.Services.ShoppingCartAPI.Messaging
     public class RabbitMQOrderConfirmedConsumer : IRabbitMQOrderConfirmedConsumer
     {
         private readonly IConfiguration _configuration;
-        private readonly AppDbContext _db;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly string _orderConfirmedQueue;
         private IConnection _connection;
         private IModel _channel;
 
-        public RabbitMQOrderConfirmedConsumer(IConfiguration configuration, AppDbContext db)
+        public RabbitMQOrderConfirmedConsumer(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
-            _db = db;
+            _scopeFactory = scopeFactory;
             _orderConfirmedQueue = _configuration.GetValue<string>("TopicAndQueueNames:OrderConfirmedQueue") ?? "orderconfirmedqueue";
         }
 
@@ -65,13 +66,16 @@ namespace Mango.Services.ShoppingCartAPI.Messaging
 
         private async Task ClearCart(string userId)
         {
-            var cartHeaderFromDb = await _db.CartHeaders.FirstOrDefaultAsync(u => u.UserId == userId);
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var cartHeaderFromDb = await db.CartHeaders.FirstOrDefaultAsync(u => u.UserId == userId);
             if (cartHeaderFromDb != null)
             {
-                var cartDetails = _db.CartDetails.Where(u => u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
-                _db.CartDetails.RemoveRange(cartDetails);
-                _db.CartHeaders.Remove(cartHeaderFromDb);
-                await _db.SaveChangesAsync();
+                var cartDetails = db.CartDetails.Where(u => u.CartHeaderId == cartHeaderFromDb.CartHeaderId);
+                db.CartDetails.RemoveRange(cartDetails);
+                db.CartHeaders.Remove(cartHeaderFromDb);
+                await db.SaveChangesAsync();
             }
         }
 
