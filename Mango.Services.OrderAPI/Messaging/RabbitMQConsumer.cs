@@ -5,12 +5,12 @@ using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,20 +19,16 @@ namespace Mango.Services.OrderAPI.Messaging
     public class RabbitMQConsumer : IRabbitMQConsumer
     {
         private readonly IConfiguration _configuration;
-        private readonly AppDbContext _db;
-        private readonly IMapper _mapper;
-        private readonly IMessageBus _messageBus;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly string _checkoutQueue;
         private readonly string _emailOrderQueue;
         private IConnection _connection;
         private IModel _channel;
 
-        public RabbitMQConsumer(IConfiguration configuration, AppDbContext db, IMapper mapper, IMessageBus messageBus)
+        public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
-            _db = db;
-            _mapper = mapper;
-            _messageBus = messageBus;
+            _scopeFactory = scopeFactory;
             _checkoutQueue = _configuration.GetValue<string>("TopicAndQueueNames:CheckoutQueue") ?? "checkoutqueue";
             _emailOrderQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailOrderQueue") ?? "emailorderqueue";
         }
@@ -76,6 +72,11 @@ namespace Mango.Services.OrderAPI.Messaging
 
         private async Task CreateOrder(CartDto cartDto)
         {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+            var messageBus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
+
             var orderHeader = new OrderHeader
             {
                 UserId = cartDto.CartHeader.UserId,
@@ -105,12 +106,12 @@ namespace Mango.Services.OrderAPI.Messaging
             }
             orderHeader.OrderDetails = orderDetailsList;
 
-            _db.OrderHeaders.Add(orderHeader);
-            await _db.SaveChangesAsync();
+            db.OrderHeaders.Add(orderHeader);
+            await db.SaveChangesAsync();
 
             // Publish order confirmation to email queue
-            var orderDto = _mapper.Map<OrderDto>(orderHeader);
-            await _messageBus.PublishMessage(orderDto, _emailOrderQueue);
+            var orderDto = mapper.Map<OrderDto>(orderHeader);
+            await messageBus.PublishMessage(orderDto, _emailOrderQueue);
         }
 
         public Task Stop()
