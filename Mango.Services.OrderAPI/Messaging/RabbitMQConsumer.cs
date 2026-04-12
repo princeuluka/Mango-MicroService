@@ -2,8 +2,8 @@ using Mango.MessageBus;
 using Mango.Services.OrderAPI.Data;
 using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Models.Dto;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,17 +16,17 @@ namespace Mango.Services.OrderAPI.Messaging
     public class RabbitMQConsumer : IRabbitMQConsumer
     {
         private readonly IConfiguration _configuration;
-        private readonly DbContextOptions<AppDbContext> _dbOptions;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IMessageBus _messageBus;
         private readonly string _checkoutQueue;
         private readonly string _emailQueue;
         private IConnection? _connection;
         private IModel? _channel;
 
-        public RabbitMQConsumer(IConfiguration configuration, DbContextOptions<AppDbContext> dbOptions, IMessageBus messageBus)
+        public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory, IMessageBus messageBus)
         {
             _configuration = configuration;
-            _dbOptions = dbOptions;
+            _serviceScopeFactory = serviceScopeFactory;
             _messageBus = messageBus;
             _checkoutQueue = _configuration.GetValue<string>("TopicAndQueueNames:CheckoutQueue") ?? "checkoutqueue";
             _emailQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue") ?? "emailshoppingcart";
@@ -73,7 +73,8 @@ namespace Mango.Services.OrderAPI.Messaging
 
         private async Task HandleCheckoutMessage(CartDto cartDto)
         {
-            using var _db = new AppDbContext(_dbOptions);
+            using var scope = _serviceScopeFactory.CreateScope();
+            var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             OrderHeader orderHeader = new()
             {

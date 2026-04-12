@@ -58,9 +58,6 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddSingleton<IMessageBus, MessageBus>();
 
-var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
-optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-
 builder.Services.AddSingleton<IRabbitMQConsumer, RabbitMQConsumer>();
 
 builder.AddAppAuthentication();
