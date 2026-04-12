@@ -22,9 +22,5 @@ namespace Mango.Services.OrderAPI.Models.Dto
         public string Country { get; set; }
         public List<CartDetailsDto> CartDetails { get; set; } = new List<CartDetailsDto>();
         public DateTime OrderTime { get; set; }
-        public string? CardNumber { get; set; }
-        public string? CVV { get; set; }
-        public string? ExpiryMonth { get; set; }
-        public string? ExpiryYear { get; set; }
     }
 }

@@ -107,11 +107,13 @@ namespace Mango.Services.OrderAPI.Controllers
                 OrderHeader orderHeader = _db.OrderHeaders.First(u => u.OrderHeaderId == orderId);
                 if (orderHeader != null)
                 {
-                    orderHeader.Status = newStatus;
-                    if (newStatus == SD.Status_Completed)
+                    if (!IsValidStatusTransition(orderHeader.Status, newStatus))
                     {
-                        // can handle payment etc
+                        _response.IsSuccess = false;
+                        _response.Message = "Invalid status transition";
+                        return _response;
                     }
+                    orderHeader.Status = newStatus;
                     _db.SaveChanges();
                 }
                 _response.IsSuccess = true;
@@ -124,7 +126,35 @@ namespace Mango.Services.OrderAPI.Controllers
             return _response;
         }
 
-        // Stripe session creation stub for checkout flow
+        private bool IsValidStatusTransition(string currentStatus, string newStatus)
+        {
+            string[] allowedStatuses = { SD.Status_Pending, SD.Status_Approved, SD.Status_ReadyForPickup, SD.Status_Completed, SD.Status_Cancelled };
+            if (!allowedStatuses.Contains(newStatus))
+            {
+                return false;
+            }
+
+            if (currentStatus == SD.Status_Completed || currentStatus == SD.Status_Cancelled)
+            {
+                return false;
+            }
+
+            if (currentStatus == SD.Status_Pending)
+            {
+                return newStatus == SD.Status_Approved || newStatus == SD.Status_Cancelled;
+            }
+            if (currentStatus == SD.Status_Approved)
+            {
+                return newStatus == SD.Status_ReadyForPickup || newStatus == SD.Status_Cancelled;
+            }
+            if (currentStatus == SD.Status_ReadyForPickup)
+            {
+                return newStatus == SD.Status_Completed || newStatus == SD.Status_Cancelled;
+            }
+
+            return false;
+        }
+
         [HttpPost("CreateStripeSession")]
         [Authorize]
         public ResponseDto CreateStripeSession([FromBody] StripeRequestDto stripeRequestDto)
