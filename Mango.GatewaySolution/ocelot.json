@@ -10,7 +10,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/auth/{catchAll}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "auth"
     },
     {
       "DownstreamPathTemplate": "/api/auth",
@@ -22,7 +23,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/auth",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "auth"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI",
@@ -37,7 +39,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI/{catchAll}",
@@ -52,7 +55,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -64,7 +68,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -79,7 +84,8 @@
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{catchAll}",
@@ -91,7 +97,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI/{catchAll}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{catchAll}",
@@ -106,7 +113,8 @@
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/cart",
@@ -121,7 +129,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "cart"
     },
     {
       "DownstreamPathTemplate": "/api/cart/{catchAll}",
@@ -136,7 +145,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "cart"
     },
     {
       "DownstreamPathTemplate": "/api/order",
@@ -151,7 +161,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "order"
     },
     {
       "DownstreamPathTemplate": "/api/order/{catchAll}",
@@ -166,7 +177,60 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "order"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "auth",
+      "Config": [
+        {
+          "Name": "Auth API",
+          "Version": "v1",
+          "Url": "https://localhost:7002/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "coupon",
+      "Config": [
+        {
+          "Name": "Coupon API",
+          "Version": "v1",
+          "Url": "https://localhost:7001/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "product",
+      "Config": [
+        {
+          "Name": "Product API",
+          "Version": "v1",
+          "Url": "https://localhost:7004/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "cart",
+      "Config": [
+        {
+          "Name": "Cart API",
+          "Version": "v1",
+          "Url": "https://localhost:7003/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "order",
+      "Config": [
+        {
+          "Name": "Order API",
+          "Version": "v1",
+          "Url": "https://localhost:7005/swagger/v1/swagger.json"
+        }
+      ]
     }
   ],
   "GlobalConfiguration": {
