@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MMLib.SwaggerForOcelot.DependencyInjection;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using System.Text;
@@ -33,6 +34,9 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+// Add Swagger for Ocelot
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
+
 builder.Services.AddOcelot();
 
 var app = builder.Build();
@@ -42,6 +46,12 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+// Swagger UI for aggregated downstream APIs
+app.UseSwaggerForOcelotUI(opt =>
+{
+    opt.PathToSwaggerGenerator = "/swagger/docs";
+});
 
 await app.UseOcelot();
 
