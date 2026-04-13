@@ -11,7 +11,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/auth/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "auth"
     },
 
     // ========== CouponAPI - All endpoints require authentication ==========
@@ -29,7 +30,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI/{everything}",
@@ -45,7 +47,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "coupon"
     },
 
     // ========== ProductAPI - GET is public, POST/PUT/DELETE require authentication ==========
@@ -60,7 +63,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{everything}",
@@ -72,7 +76,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     // Protected POST/PUT/DELETE routes
     {
@@ -89,7 +94,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{everything}",
@@ -105,7 +111,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "product"
     },
 
     // ========== CartAPI - All endpoints require authentication ==========
@@ -123,7 +130,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "cart"
     },
 
     // ========== OrderAPI - All endpoints require authentication ==========
@@ -141,7 +149,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "order"
     }
   ],
   "SwaggerEndPoints": [
