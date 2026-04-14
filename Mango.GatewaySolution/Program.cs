@@ -31,6 +31,10 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
+
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
@@ -38,6 +42,9 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-await app.UseOcelot();
+app.UseSwaggerForOcelotUI(opt =>
+{
+    opt.PathToSwaggerGenerator = "/swagger/docs";
+}).UseOcelot().Wait();
 
 app.Run();

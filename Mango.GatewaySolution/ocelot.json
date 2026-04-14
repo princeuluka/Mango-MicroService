@@ -1,4 +1,61 @@
 {
+  "SwaggerEndPoints": [
+    {
+      "Key": "coupon",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Coupon API",
+          "Version": "v1",
+          "Url": "https://localhost:7001/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "product",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Product API",
+          "Version": "v1",
+          "Url": "https://localhost:7004/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "cart",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Cart API",
+          "Version": "v1",
+          "Url": "https://localhost:7003/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "order",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Order API",
+          "Version": "v1",
+          "Url": "https://localhost:7005/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "auth",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Auth API",
+          "Version": "v1",
+          "Url": "https://localhost:7002/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
   "Routes": [
     {
       "DownstreamPathTemplate": "/api/CouponAPI/{everything}",
@@ -13,7 +70,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI",
@@ -28,7 +86,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{everything}",
@@ -40,7 +99,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{everything}",
@@ -55,7 +115,8 @@
       "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -67,7 +128,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -82,7 +144,8 @@
       "UpstreamHttpMethod": [ "POST", "PUT" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/cart/{everything}",
@@ -97,7 +160,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "cart"
     },
     {
       "DownstreamPathTemplate": "/api/order/{everything}",
@@ -112,7 +176,8 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
-      }
+      },
+      "SwaggerKey": "order"
     },
     {
       "DownstreamPathTemplate": "/api/auth/{everything}",
@@ -124,7 +189,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/auth/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "auth"
     }
   ],
   "GlobalConfiguration": {
