@@ -31,8 +31,6 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 
 builder.Services.AddOcelot(builder.Configuration);
