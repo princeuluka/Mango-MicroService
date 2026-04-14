@@ -10,7 +10,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/auth/{everything}",
-      "UpstreamHttpMethod": [ "POST" ]
+      "UpstreamHttpMethod": [ "POST" ],
+      "SwaggerKey": "auth"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI",
@@ -26,7 +27,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI/{id}",
@@ -42,7 +44,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/CouponAPI/GetByCode/{code}",
@@ -58,7 +61,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "coupon"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -70,7 +74,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI",
@@ -86,7 +91,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{id}",
@@ -98,7 +104,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI/{id}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/{id}",
@@ -114,7 +121,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/ProductAPI/GetByCategoryName/{categoryName}",
@@ -126,7 +134,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ProductAPI/GetByCategoryName/{categoryName}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "SwaggerKey": "product"
     },
     {
       "DownstreamPathTemplate": "/api/cart/{everything}",
@@ -138,7 +147,8 @@
         }
       ],
       "UpstreamPathTemplate": "/api/cart/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "SwaggerKey": "cart"
     },
     {
       "DownstreamPathTemplate": "/api/order/{everything}",
@@ -154,7 +164,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "SwaggerKey": "order"
     }
   ],
   "GlobalConfiguration": {

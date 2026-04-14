@@ -1,4 +1,3 @@
-using Mango.GatewaySolution;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -40,7 +39,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Mango Gateway API",
         Version = "v1",
-        Description = "API Gateway for Mango Microservices - All downstream APIs accessible through this gateway"
+        Description = "API Gateway for Mango Microservices"
     });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -66,11 +65,10 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
-
-    options.DocumentFilter<GatewayDocumentFilter>();
 });
 
 builder.Services.AddOcelot();
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
 
 var app = builder.Build();
 
@@ -83,6 +81,11 @@ app.UseSwaggerUI(options =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSwaggerForOcelotUI(options =>
+{
+    options.PathToSwaggerGenerator = "/swagger/docs";
+});
 
 await app.UseOcelot();
 
