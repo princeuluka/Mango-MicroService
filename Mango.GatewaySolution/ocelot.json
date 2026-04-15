@@ -151,6 +151,24 @@
         "AllowedScopes": []
       },
       "SwaggerKey": "order"
+    },
+    // ========== RewardAPI - All endpoints require authentication ==========
+    {
+      "DownstreamPathTemplate": "/api/reward/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7006
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reward/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "SwaggerKey": "reward"
     }
   ],
   "SwaggerEndPoints": [
@@ -201,6 +219,16 @@
           "Name": "Order API",
           "Version": "v1",
           "Url": "https://localhost:7005/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "reward",
+      "Config": [
+        {
+          "Name": "Reward API",
+          "Version": "v1",
+          "Url": "https://localhost:7006/swagger/v1/swagger.json"
         }
       ]
     }
