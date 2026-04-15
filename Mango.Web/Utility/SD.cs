@@ -7,6 +7,7 @@
         public static string ProductAPIBase { get; set; }
         public static string CartAPIBase { get; set; }
         public static string OrderAPIBase { get; set; }
+        public static string RewardAPIBase { get; set; }
 
         public const string RoleAdmin = "ADMIN";
         public const string RoleCustomer = "CUSTOMER";

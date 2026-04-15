@@ -15,3 +15,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  rewardapi:
+    image: ${DOCKER_REGISTRY-}rewardapi
+    build:
+      context: .
+      dockerfile: Mango.Services.RewardAPI/Dockerfile
+    container_name: mango-rewardapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings:DefaultConnection=Server=mssql;Database=Mango_Reward;User=sa;Password=YourPassword123;TrustServerCertificate=True;"
+      - "MessageBus:Host=rabbitmq"
+      - "MessageBus:Port=5672"
+      - "MessageBus:UserName=guest"
+      - "MessageBus:Password=guest"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7011:7011"
+      - "5023:5023"
